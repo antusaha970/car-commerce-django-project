@@ -10,4 +10,5 @@ urlpatterns = [
     path('filter/<int:brand>/', views.HomePage.as_view(), name="brand_filter"),
     path('car/<int:pk>/', views.CarDetailView.as_view(), name="car_detail"),
     path('car/order/<int:pk>/', views.CarDetailView.as_view(), name="car_detail"),
+    path('car/comment/<int:pk>/', views.save_comments, name="comment"),
 ]

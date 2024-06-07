@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import ListView, CreateView, UpdateView, TemplateView, DetailView
 from django.contrib.auth.views import LogoutView, LoginView
 from django.contrib.auth.models import User
@@ -6,8 +6,8 @@ from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from .models import Car, Brand, Orders
-from .forms import SignUpForm, UpdateUserForm
+from .models import Car, Brand, Orders, Comment
+from .forms import SignUpForm, UpdateUserForm, CommentForm
 # Create your views here.
 
 
@@ -104,6 +104,11 @@ class CarDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["data"] = context['object']
+        context['form'] = CommentForm()
+        context['total_comment'] = Comment.objects.filter(
+            car__id=self.kwargs.get('pk')).count()
+        context['comments'] = Comment.objects.filter(
+            car__id=self.kwargs.get('pk'))
         return context
 
     def post(self, request, *args, **kwargs):
@@ -120,3 +125,13 @@ class CarDetailView(DetailView):
         car.save()
 
         return self.get(self.request)
+
+
+def save_comments(request, pk):
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        car = Car.objects.get(pk=pk)
+        new_cmt = Comment(
+            name=form.cleaned_data['name'], body=form.cleaned_data['body'], car=car)
+        new_cmt.save()
+    return redirect("car_detail", pk=pk)

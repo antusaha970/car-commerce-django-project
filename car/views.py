@@ -4,7 +4,7 @@ from django.contrib.auth.views import LogoutView, LoginView
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login
-from .models import Car, Brand
+from .models import Car, Brand, Orders
 from .forms import SignUpForm, UpdateUserForm
 # Create your views here.
 
@@ -64,6 +64,14 @@ class UpdateUserView(UpdateView):
 class ProfileView(TemplateView):
     template_name = "profile.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        logged_in_user = self.request.user
+        user = User.objects.get(username=logged_in_user)
+        orders = Orders.objects.filter(user=user)
+        context["orders"] = orders
+        return context
+
 
 class HomePage(ListView):
     model = Car
@@ -74,6 +82,7 @@ class HomePage(ListView):
         brand = self.kwargs.get('brand')
         if brand is not None:
             q = Car.objects.filter(brand__id=brand)
+
         return q
 
     def get_context_data(self, **kwargs):
@@ -91,3 +100,18 @@ class CarDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["data"] = context['object']
         return context
+
+    def post(self, request, *args, **kwargs):
+        car_id = self.kwargs.get('pk')
+        logged_in_user = self.request.user
+
+        car = Car.objects.get(pk=car_id)
+        user = User.objects.get(username=logged_in_user)
+
+        order = Orders(user=user, car=car)
+        order.save()
+
+        car.quantity = car.quantity - 1
+        car.save()
+
+        return self.get(self.request)

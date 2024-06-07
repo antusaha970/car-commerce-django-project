@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -33,3 +34,9 @@ class Comment(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class Orders(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="user")
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name="car")

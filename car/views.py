@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import ListView, CreateView, UpdateView, TemplateView
+from django.views.generic import ListView, CreateView, UpdateView, TemplateView, DetailView
 from django.contrib.auth.views import LogoutView, LoginView
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
@@ -80,4 +80,14 @@ class HomePage(ListView):
         context = super().get_context_data(**kwargs)
         context["data"] = context['object_list']
         context['brands'] = Brand.objects.all()
+        return context
+
+
+class CarDetailView(DetailView):
+    model = Car
+    template_name = 'carDetails.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["data"] = context['object']
         return context

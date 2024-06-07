@@ -4,6 +4,8 @@ from django.contrib.auth.views import LogoutView, LoginView
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from .models import Car, Brand, Orders
 from .forms import SignUpForm, UpdateUserForm
 # Create your views here.
@@ -30,6 +32,7 @@ class SignUpView(CreateView):
         return response
 
 
+@method_decorator(login_required, name="dispatch")
 class LogOutUserView(LogoutView):
     next_page = reverse_lazy("homePage")
 
@@ -46,6 +49,7 @@ class LogInUserView(LoginView):
         return context
 
 
+@method_decorator(login_required, name="dispatch")
 class UpdateUserView(UpdateView):
     model = User
     form_class = UpdateUserForm
@@ -61,6 +65,7 @@ class UpdateUserView(UpdateView):
         return self.request.user
 
 
+@method_decorator(login_required, name="dispatch")
 class ProfileView(TemplateView):
     template_name = "profile.html"
 
